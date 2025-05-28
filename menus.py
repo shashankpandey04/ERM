@@ -9973,7 +9973,7 @@ class ShiftTypeCreator(discord.ui.View):
         await message.edit(embed=embed, view=self)
 
     @discord.ui.select(
-        cls=discord.ui.RoleSelect, placeholder="On-Duty Role", row=0, max_values=25
+        cls=discord.ui.RoleSelect, placeholder="On-Duty Roles", row=0, max_values=25
     )  # changed to On-Duty Role for parity with the other select
     async def on_duty_roles(
         self, interaction: discord.Interaction, select: discord.ui.RoleSelect
@@ -10080,71 +10080,25 @@ class ShiftTypeCreator(discord.ui.View):
         except discord.NotFound:
             await self.refresh_ui(await self.restored_interaction.original_response())
 
-    # @discord.ui.select(
-    #     cls=discord.ui.ChannelSelect,
-    #     placeholder="Shift Channel",
-    #     row=2,
-    #     max_values=1,
-    #     channel_types=[discord.ChannelType.text],
-    # )
-    # async def channel_select(
-    #     self, interaction: discord.Interaction, select: discord.ui.ChannelSelect
-    # ):
-    #     await interaction.response.defer()
-
-    #     self.dataset["channel"] = [i.id for i in select.values][0]
-    #     try:
-    #         await self.refresh_ui(interaction.message)
-    #     except discord.NotFound:
-    #         await self.refresh_ui(await self.restored_interaction.original_response())
-
-    @discord.ui.button(label="Set Shift Channel", row=3)
-    async def set_shift_channel(
-        self, interaction: discord.Interaction, button: discord.ui.Button
+    @discord.ui.select(
+        cls=discord.ui.ChannelSelect,
+        placeholder="Shift Channel",
+        row=3,
+        max_values=1,
+        channel_types=[discord.ChannelType.text],
+    )
+    async def channel_select(
+        self, interaction: discord.Interaction, select: discord.ui.ChannelSelect
     ):
-        modal = CustomModal(
-            "Shift Channel ID",
-            [
-                (
-                    "channel_id",
-                    discord.ui.TextInput(
-                        label="Shift Channel ID",
-                        placeholder="This is the channel ID of the channel you want to set as the shift channel.",
-                        required=False,
-                    ),
-                )
-            ],
-        )
-        await interaction.response.send_modal(modal)
-        await modal.wait()
-        try:
-            chosen_identifier = int(modal.channel_id.value)
-        except ValueError:
-            return
-        if not chosen_identifier:
-            return
+        await interaction.response.defer()
 
-        self.dataset["channel"] = chosen_identifier
+        self.dataset["channel"] = [i.id for i in select.values][0]
         try:
             await self.refresh_ui(interaction.message)
         except discord.NotFound:
             await self.refresh_ui(await self.restored_interaction.original_response())
-        # await interaction.response.defer()
-        # await interaction.followup.send(
-        #     embed=discord.Embed(
-        #         title="Shift Channel Set",
-        #         description=f"The shift channel has been set to <#{chosen_identifier}>",
-        #         color=BLANK_COLOR,
-        #     ),
-        #     ephemeral=True,
-        # )
-        # self.dataset["channel"] = chosen_identifier
-        # try:
-        #     await self.refresh_ui(interaction.message)
-        # except discord.NotFound:
-        #     await self.refresh_ui(await self.restored_interaction.original_response())
 
-    @discord.ui.button(label="Edit Nickname Prefix", row=3)
+    @discord.ui.button(label="Edit Nickname Prefix", row=4)
     async def edit_nickname_prefix(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
@@ -10176,7 +10130,7 @@ class ShiftTypeCreator(discord.ui.View):
         except discord.NotFound:
             await self.refresh_ui(await self.restored_interaction.original_response())
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=3)
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=4)
     async def cancel(self, interaction: discord.Interaction, button: discord.Button):
         await interaction.response.defer(ephemeral=True)
         self.cancelled = True
@@ -10195,7 +10149,7 @@ class ShiftTypeCreator(discord.ui.View):
         self.stop()
 
     @discord.ui.button(
-        label="Finish", style=discord.ButtonStyle.green, disabled=True, row=3
+        label="Finish", style=discord.ButtonStyle.green, disabled=True, row=4
     )
     async def finish(self, interaction: discord.Interaction, _: discord.Button):
         await interaction.response.defer()
