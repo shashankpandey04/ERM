@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import gc
 import discord
 import time
 
