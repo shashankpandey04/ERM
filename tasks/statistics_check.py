@@ -108,6 +108,11 @@ async def statistics_check(bot):
             for channel_id, stat_config in statistics.items()
         ]
         await asyncio.gather(*tasks)
+        logging.info(
+            f"Statistics updated for guild {guild_id} with placeholders: {placeholders}"
+        )
+        placeholders.clear()
+        tasks.clear()
 
     end_time = time.time()
     logging.warning(f"Event statistics_check took {end_time - initial_time} seconds")
