@@ -248,28 +248,11 @@ async def handle_non_member(bot, player, guild, alert_channel, alert_message):
 
 async def send_warning_embed(bot, player, guild, alert_channel):
     try:
-        user = None
-        avatar_url = None
-        
-        try:
-            user = await asyncio.wait_for(
-                bot.roblox.get_user(int(player.id)), 
-                timeout=5.0
-            )
-            
-            if user:
-                avatar = await asyncio.wait_for(
-                    bot.roblox.thumbnails.get_user_avatar_thumbnails(
-                        [user], type=roblox.thumbnails.AvatarThumbnailType.headshot
-                    ),
-                    timeout=5.0
-                )
-                avatar_url = avatar[0].image_url if avatar else None
-        except asyncio.TimeoutError:
-            logging.warning(f"Timeout getting Roblox data for {player.username}")
-        except Exception as e:
-            logging.error(f"Error getting Roblox data: {e}")
-
+        user = await bot.roblox.get_user(int(player.id))
+        avatar = await bot.roblox.thumbnails.get_user_avatar_thumbnails(
+            [user], type=roblox.thumbnails.AvatarThumbnailType.headshot
+        )
+        avatar_url = avatar[0].image_url if avatar else None
         embed = discord.Embed(
             title="Whitelisted Vehicle Warning",
             description=f"""
