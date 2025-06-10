@@ -214,8 +214,6 @@ async def check_whitelisted_car(bot):
             
     except Exception as e:
         logging.error(f"Error in database aggregation: {e}", exc_info=True)
-    finally:
-        gc.collect()
 
     end_time = time.time()
     logging.info(
