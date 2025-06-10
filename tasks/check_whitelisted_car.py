@@ -8,7 +8,6 @@ from discord.ext import commands, tasks
 import logging
 import asyncio
 import roblox
-import gc
 
 from utils.constants import RED_COLOR, BLANK_COLOR
 from utils.prc_api import Player
