@@ -39,7 +39,6 @@ async def check_loa(bot):
                         member = guild.get_member(loaObject["user_id"])
                         settings = await bot.settings.find_by_id(guild.id)
                         roles = [None]
-                        role_removed = None
                         if settings is not None:
                             if "loa_role" in settings["staff_management"]:
                                 try:
@@ -94,14 +93,13 @@ async def check_loa(bot):
                                                     atomic=True,
                                                 )
                                             except discord.HTTPException:
-                                                role_removed = "**Alert:** ⚠️ Failed to remove LOA role due to discord issues.\nContact your Management to manually remove the role!"
                                                 pass
                         if member:
                             try:
                                 await member.send(
                                     embed=discord.Embed(
                                         title=f"{loaObject['type']} Expired",
-                                        description=f"Your {loaObject['type']} has expired in **{guild.name}**\n{role_removed if role_removed != None else ""}.",
+                                        description=f"Your {loaObject['type']} has expired in **{guild.name}**.",
                                         color=BLANK_COLOR,
                                     )
                                 )
