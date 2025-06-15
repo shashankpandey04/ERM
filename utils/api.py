@@ -374,13 +374,17 @@ class APIRoutes:
 
         embed = discord.Embed(
             title=f"Application Received",
-            description=f"""(
-            **Details:**
-            > **Member:** <@{user_id}>
-            > **User ID:** {user_id}
-            > **Application Name:** {application_name}
-            )""",
+            description="",
             color=BLANK_COLOR,
+        )
+        embed.add_field(
+            name="Application Information",
+            value=(
+                f"> **Application Name:** {application_name}\n"
+                f"> **Submitted By:** <@{user_id}>\n"
+                f"> **User ID:** {user_id}\n"
+            ),
+            inline=False,
         )
         embed.timestamp = datetime.datetime.now(pytz.utc)
         embed.set_author(
