@@ -373,11 +373,20 @@ class APIRoutes:
             raise HTTPException(status_code=404, detail="Channel not found")
 
         embed = discord.Embed(
-            title=f"New Application Received in {guild.name}",
-            description=f"A new application has been submitted by <@{user_id}> for **{application_name}**.",
+            title=f"Application Received",
+            description=f"""(
+            **Details:**
+            > **Member:** <@{user_id}>
+            > **User ID:** {user_id}
+            > **Application Name:** {application_name}
+            )""",
             color=BLANK_COLOR,
         )
         embed.timestamp = datetime.datetime.now(pytz.utc)
+        embed.set_author(
+            name=guild.name,
+            icon_url=guild.icon.url if guild.icon else None,
+        )
 
         try:
             await channel.send(embed=embed)
