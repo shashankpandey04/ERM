@@ -378,7 +378,7 @@ class APIRoutes:
             color=BLANK_COLOR,
         )
         embed.add_field(
-            name="Application Information",
+            name="Details",
             value=(
                 f"> **Application Name:** {application_name}\n"
                 f"> **Submitted By:** <@{user_id}>\n"
