@@ -1,5 +1,19 @@
 import asyncio
 from utils.prc_api import Player, ResponseFailure
+from discord.ext import commands
+
+def run_coroutine_in_loop(coro):
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()
+
+    def wrapper():
+        asyncio.ensure_future(coro).add_done_callback(
+            lambda task: fut.set_result(task.result())
+        )
+
+    loop.call_soon(wrapper)
+    return fut
+
 
 """
 Condition Variables
@@ -242,11 +256,11 @@ def determine_func_info(cond):
     return func, argument_names(func)
 
 
-async def fetch_predetermined_futures(bot, guild_id, condition, value, api_client=None):
-    return {
-        "queue": lambda: asyncio.run(get_queue(api_client, guild_id)),
-        "shifts": lambda: asyncio.run(online_shifts(bot, guild_id)),
-        "vehicles": lambda: asyncio.run(get_vehicles(api_client, guild_id)),
+async def fetch_predetermined_futures(bot: commands.Bot, guild_id, condition, value, api_client=None):
+    return { # these have been turned to futures for asynchronous reasons
+        "queue": lambda: run_coroutine_in_loop(get_queue(api_client, guild_id)),
+        "shifts": lambda: run_coroutine_in_loop(online_shifts(bot, guild_id)),
+        "vehicles": lambda: run_coroutine_in_loop(get_vehicles(api_client, guild_id)),
         "bot": lambda: bot,
         "guild_id": lambda: guild_id,
         "condition": lambda: condition,
