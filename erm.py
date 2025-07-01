@@ -283,7 +283,7 @@ class Bot(commands.AutoShardedBot):
             bot.is_synced = True
 
             # we do this so the bot can get a cache of things before we spam discord with fetches
-            asyncio.create_task(self.start_tasks())
+            # asyncio.create_task(self.start_tasks())
             
             async for document in self.views.db.find({}):
                 if document["view_type"] == "LOAMenu":
@@ -302,7 +302,7 @@ class Bot(commands.AutoShardedBot):
             self.setup_status = True
 
     async def start_tasks(self):
-        # Stagger task starts to avoid hitting rate limits simultaneously
+        logging.info("Starting tasks...")
         check_reminders.start(bot)
         logging.info("Startng the Check Reminders task...")
         await asyncio.sleep(30)
