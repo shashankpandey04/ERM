@@ -6929,8 +6929,8 @@ class PunishmentsConfiguration(AssociationConfigurationView):
         )
         await interaction.response.send_message(view=new_view, ephemeral=True)
 
-    @discord.ui.button(label="Toggle Default Punishments", row=2)
-    async def toggle_default_punishments(
+    @discord.ui.button(label="Default Punishments", row=2)
+    async def default_punishments(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
         val = await self.interaction_check(interaction)
@@ -9070,6 +9070,7 @@ class PriorityRequestConfiguration(AssociationConfigurationView):
             func = self.bot.priority_settings.db.insert_one
         priority_settings["blacklisted_roles"] = [str(i.id) for i in select.values]
         await func(priority_settings)
+        await interaction.response.defer()
 
     @discord.ui.select(
         cls=discord.ui.RoleSelect,
@@ -9088,6 +9089,7 @@ class PriorityRequestConfiguration(AssociationConfigurationView):
             {"guild_id": str(interaction.guild.id)}
         )
         func = self.bot.priority_settings.update_by_id
+        await interaction.response.defer()
         if not priority_settings:
             priority_settings = {"guild_id": str(interaction.guild.id)}
             func = self.bot.priority_settings.db.insert_one
@@ -9116,6 +9118,7 @@ class PriorityRequestConfiguration(AssociationConfigurationView):
             func = self.bot.priority_settings.db.insert_one
         priority_settings["channel_id"] = str(select.values[0].id)
         await func(priority_settings)
+        await interaction.response.defer()
 
     @discord.ui.button(label="Set Cooldown", row=3)
     async def set_cooldown(
@@ -9147,6 +9150,7 @@ class PriorityRequestConfiguration(AssociationConfigurationView):
         )
         await interaction.response.send_modal(self.modal)
         await self.modal.wait()
+        
         cooldown = self.modal.cooldown.value
         cooldown = int(cooldown.strip())
 
@@ -9834,6 +9838,7 @@ class CheckMark(discord.ui.View):
 
 class CompleteReminder(discord.ui.View):
     def __init__(self, bot):
+        self.bot = bot
         super().__init__(timeout=1200.0)
 
     # When the confirm button is pressed, set the inner value to `True` and
@@ -9981,7 +9986,7 @@ class ShiftTypeCreator(discord.ui.View):
         await message.edit(embed=embed, view=self)
 
     @discord.ui.select(
-        cls=discord.ui.RoleSelect, placeholder="On-Duty Role", row=0, max_values=25
+        cls=discord.ui.RoleSelect, placeholder="On-Duty Roles", row=0, max_values=25
     )  # changed to On-Duty Role for parity with the other select
     async def on_duty_roles(
         self, interaction: discord.Interaction, select: discord.ui.RoleSelect
@@ -10025,11 +10030,11 @@ class ShiftTypeCreator(discord.ui.View):
     @discord.ui.select(
         cls=discord.ui.RoleSelect,
         placeholder="Break Roles",
-        row=0,
+        row=1,
         min_values=0,
         max_values=25,
     )  # changed to On-Duty Role for parity with the other select
-    async def on_duty_roles(
+    async def break_roles(
         self, interaction: discord.Interaction, select: discord.ui.RoleSelect
     ):
         # secvuln: prevention
@@ -10073,7 +10078,7 @@ class ShiftTypeCreator(discord.ui.View):
     @discord.ui.select(
         cls=discord.ui.RoleSelect,
         placeholder="Access Roles",
-        row=1,
+        row=2,
         max_values=25,
         min_values=0,
     )
@@ -10091,7 +10096,7 @@ class ShiftTypeCreator(discord.ui.View):
     @discord.ui.select(
         cls=discord.ui.ChannelSelect,
         placeholder="Shift Channel",
-        row=2,
+        row=3,
         max_values=1,
         channel_types=[discord.ChannelType.text],
     )
@@ -10106,7 +10111,7 @@ class ShiftTypeCreator(discord.ui.View):
         except discord.NotFound:
             await self.refresh_ui(await self.restored_interaction.original_response())
 
-    @discord.ui.button(label="Edit Nickname Prefix", row=3)
+    @discord.ui.button(label="Edit Nickname Prefix", row=4)
     async def edit_nickname_prefix(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
@@ -10138,7 +10143,7 @@ class ShiftTypeCreator(discord.ui.View):
         except discord.NotFound:
             await self.refresh_ui(await self.restored_interaction.original_response())
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=3)
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.danger, row=4)
     async def cancel(self, interaction: discord.Interaction, button: discord.Button):
         await interaction.response.defer(ephemeral=True)
         self.cancelled = True
@@ -10157,7 +10162,7 @@ class ShiftTypeCreator(discord.ui.View):
         self.stop()
 
     @discord.ui.button(
-        label="Finish", style=discord.ButtonStyle.green, disabled=True, row=3
+        label="Finish", style=discord.ButtonStyle.green, disabled=True, row=4
     )
     async def finish(self, interaction: discord.Interaction, _: discord.Button):
         await interaction.response.defer()
@@ -11003,6 +11008,14 @@ class AdministratedShiftMenu(discord.ui.View):
                     embed=discord.Embed(
                         title="Invalid Time",
                         description="I could not convert this time. Please try again.",
+                        color=BLANK_COLOR,
+                    )
+                )
+            except OverflowError:
+                return await self.modal.interaction.followup.send(
+                    embed=discord.Embed(
+                        title="Invalid Time",
+                        description="You can't add more than 6 months in shift time.",
                         color=BLANK_COLOR,
                     )
                 )

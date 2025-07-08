@@ -10,13 +10,9 @@ import utils.prc_api
 from utils import prc_api
 from utils.prc_api import Player
 import asyncio
-import nest_asyncio
 from utils.conditions import *
 import datetime
 import pytz
-
-nest_asyncio.apply()
-# this is quite dangerous but we don't really have much of an option
 
 
 async def handle_erlc_condition(bot, guild_id, condition) -> bool:
@@ -53,6 +49,15 @@ async def handle_erlc_condition(bot, guild_id, condition) -> bool:
             values.append(func(*submitted_arguments))
         else:
             values.append(func(*submitted_arguments))
+
+    new_values = []
+    # unfuture the values
+    for value in values:
+        if isinstance(value, asyncio.Future):
+            new_values.append(await value)
+        else:
+            new_values.append(value)
+    
     return handle_comparison_operations(*values, condition["Operation"])
 
 
@@ -80,23 +85,12 @@ async def handle_erm_condition(bot, guild_id, condition) -> bool:
 
 @tasks.loop(minutes=1)
 async def iterate_conditions(bot):
-    filter_map = (
-        {"Guild": int(config("CUSTOM_GUILD_ID", default=0))}
-        if config("ENVIRONMENT") == "CUSTOM"
-        else {
-            "Guild": {
-                "$nin": [
-                    int(item["GuildID"] or 0)
-                    async for item in bot.whitelabel.db.find({})
-                ]
-            }
-        }
-    )
+
 
     actions = [
         i
         async for i in bot.actions.db.find(
-            {"Conditions": {"$exists": True, "$ne": []}, **filter_map}
+            {"Conditions": {"$exists": True, "$ne": []}}
         )
     ]
     for action in actions:

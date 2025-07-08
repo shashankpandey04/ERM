@@ -124,7 +124,7 @@ class Bot(commands.AutoShardedBot):
         if user.id == 1165311055728226444:
             return True
 
-        if environment != "CUSTOM":
+        if environment != "CUSTOM": # let's not allow custom bot owners to use jishaku lol
             return await super().is_owner(user)
         else:
             return False
@@ -260,7 +260,7 @@ class Bot(commands.AutoShardedBot):
 
             # we do this so the bot can get a cache of things before we spam discord with fetches
             asyncio.create_task(self.start_tasks())
-
+            
             async for document in self.views.db.find({}):
                 if document["view_type"] == "LOAMenu":
                     for index, item in enumerate(document["args"]):
@@ -278,14 +278,12 @@ class Bot(commands.AutoShardedBot):
             self.setup_status = True
 
     async def start_tasks(self):
-        logging.info("Starting tasks after 10 minute delay...")
-        # await asyncio.sleep(600)  # 10 mins
+        logging.info("Starting tasks...")
         check_reminders.start(bot)
         check_loa.start(bot)
         iterate_ics.start(bot)
-        # GDPR.start()
         iterate_prc_logs.start(bot)
-        # statistics_check.start(bot)
+        statistics_check.start(bot)
         tempban_checks.start(bot)
         check_whitelisted_car.start(bot)
         if self.environment != "CUSTOM":
@@ -406,7 +404,7 @@ async def on_message(
     message,
 ):  # DO NOT COG
 
-    if environment == "CUSTOM" and not message.guild:
+    if not message.guild:
         return await bot.process_commands(message)
 
     if (
@@ -416,10 +414,7 @@ async def on_message(
     ):
         if message.guild.id != int(config("CUSTOM_GUILD_ID")):
             ctx = await bot.get_context(message)
-            if ctx.command:
-                if "jishaku" in ctx.command.full_parent_name:
-                    await bot.process_commands(message)
-                    return
+            if ctx.command is not None:
                 await message.reply(
                     embed=discord.Embed(
                         title="Not Permitted",
@@ -429,16 +424,8 @@ async def on_message(
                 )
                 return
 
-    filter_map = [
-        int(item["GuildID"] or 0)
-        async for item in bot.whitelabel.db.find({})
-    ]
-
-    if message.guild is None:
-        return await bot.process_commands(message)
-        
-    if message.guild.id in filter_map and environment == "PRODUCTION":
-        return # handle ERM responses to prefix commands
+    if environment == "PRODUCTION" and await bot.whitelabel.db.find_one({"GuildID": message.guild.id}) is not None:
+        return
 
     await bot.process_commands(message)
 
@@ -593,16 +580,6 @@ async def warning_json_to_mongo(jsonName: str, guildId: int):
             await bot.warnings.insert(structure)
         else:
             await bot.warnings.update(structure)
-
-
-bot.erm_team = {
-    "i_imikey": "Bot Developer",
-    "mbrinkley": "First Community Manager - Removed",
-    "theoneandonly_5567": "Executive Manager",
-    "royalcrests": "Website Developer & Asset Designer",
-    "1friendlydoge": "Data Scientist - a friendly doge",
-}
-
 bot.warning_json_to_mongo = warning_json_to_mongo
 
 # include environment variables
@@ -671,11 +648,10 @@ def run():
     try:
         bot.run(bot_token)
     except Exception as e:
-        raise e  # sentry got ratelimited guys
-
-        # with sentry_sdk.isolation_scope() as scope:
-        #     scope.level = "error"
-        #     capture_exception(e)
+        with sentry_sdk.isolation_scope() as scope:
+            scope.level = "error"
+            capture_exception(e)
+        raise e
 
 
 if __name__ == "__main__":

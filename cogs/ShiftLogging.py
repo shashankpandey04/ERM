@@ -57,7 +57,8 @@ class ShiftLogging(commands.Cog):
     @is_staff()
     @require_settings()
     @app_commands.describe(member = "The staff member to view shifts for.", shift_type="The type of shift to view.")
-    async def duty_time(self, ctx, member: discord.Member = None, shift_type: str = None):
+    @app_commands.autocomplete(shift_type=shift_type_autocomplete)
+    async def duty_time(self, ctx, member: discord.Member = None, shift_type: str = "Default"):
         if self.bot.shift_management_disabled:
             return await new_failure_embed(
                 ctx,
@@ -141,9 +142,13 @@ class ShiftLogging(commands.Cog):
             embed.add_field(name="Ongoing Shift",
                             value=td_format(datetime.timedelta(seconds=get_elapsed_time(active_shift))), inline=False)
 
+
+        # we need support for old python versions
+        newline = "\n"
+
         embed.add_field(
             name=f"Shift Time [{len(shifts)}]",
-            value=f"{td_format(datetime.timedelta(seconds=total_seconds))} {'\n*Met Quota*' if met_quota else '\n*Not Met Quota*' if met_quota is not None else ''}",
+            value=f"{td_format(datetime.timedelta(seconds=total_seconds))} {'{}*Met Quota*'.format(newline) if met_quota else '{}*Not Met Quota*'.format(newline) if met_quota is not None else ''}",
         )
 
         embed.set_thumbnail(url=member.display_avatar.url)
@@ -1347,7 +1352,7 @@ class ShiftLogging(commands.Cog):
         msg = None
         shift_type_item = None
         if shift_types and len(shift_types) >= 1:
-            if type.lower() not in [ i["name"].lower() for i in shift_types ]:
+            if type.lower() not in [ t["name"].lower() for t in shift_types ]:
                 msg = await ctx.send(
                     embed=discord.Embed(
                         title="Incorrect Shift Type",
@@ -1383,7 +1388,13 @@ class ShiftLogging(commands.Cog):
             if type.lower() == "default":
                 shift_type_item = {"name": "Default"}
             else:
-                shift_type_item = None
+                return await ctx.send(
+                    embed=discord.Embed(
+                        title="Incorrect Shift Type",
+                        description="The shift type provided is not valid.",
+                        color=BLANK_COLOR,
+                    )
+                )
 
         shift_cursor = self.bot.shift_management.shifts.db.find(
             {"UserID": user.id, "Guild": ctx.guild.id, "Type": shift_type_item["name"]}

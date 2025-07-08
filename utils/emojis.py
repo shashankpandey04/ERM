@@ -18,7 +18,8 @@ default_emojis = {
     "ShiftBreak": 1178034531702411375,
     "ShiftEnded": 1178035088655646880,
     "arrow": 1169695690784518154,
-    "l_arrow": 1169754353326903407
+    "l_arrow": 1169754353326903407,
+    "security": 1169804198741823538,
 }
 
 
@@ -29,9 +30,6 @@ class EmojiController:
         self.emojis = {}
 
     async def prefetch_emojis(self):
-        if self.environment == "PRODUCTION":
-            self.emojis = default_emojis
-            return
 
         application_emojis = await self.bot.fetch_application_emojis()
         for item in os.listdir("assets/emojis"):
@@ -48,9 +46,6 @@ class EmojiController:
             self.emojis[emoji.name] = emoji.id
 
     def get_emoji(self, emoji_name):
-        if self.environment == "PRODUCTION":
-            return "<:{}:{}>".format(emoji_name, default_emojis[emoji_name])
-
         if not self.emojis:
             asyncio.run(self.prefetch_emojis())
 
