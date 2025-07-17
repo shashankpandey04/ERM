@@ -22,6 +22,8 @@ from tasks.change_status import change_status
 from tasks.check_whitelisted_car import check_whitelisted_car
 from tasks.sync_weather import sync_weather
 from tasks.iterate_conditions import iterate_conditions
+from tasks.PRCDiscordChecks import prc_discord_checks
+from tasks.MCDiscordChecks import mc_discord_checks
 from utils.emojis import EmojiController
 
 from utils.log_tracker import LogTracker
@@ -339,6 +341,12 @@ class Bot(commands.AutoShardedBot):
         await asyncio.sleep(30)
         check_infractions.start(bot)
         logging.info("Starting the Check Infractions task...")
+        await asyncio.sleep(30)
+        prc_discord_checks.start(bot)
+        logging.info("Starting the ER:LC Discord Checks task...")
+        await asyncio.sleep(30)
+        #mc_discord_checks.start(bot)
+        #logging.info("Starting the MC Discord Checks task...")
         logging.info("All tasks are now running!")
 
 
