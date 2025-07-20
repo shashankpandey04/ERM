@@ -34,8 +34,7 @@ class OnMessage(commands.Cog):
                 if await bot.whitelabel.db.find_one({"Guild": message.guild.id}) is not None:
                     return
             except Exception as e:
-                logging.error(f"Error checking whitelabel status: {e}")
-                return
+                logging.info(f"Skipping Non-Whitelabel Guild: {message.guild.id} - {e}")
             
         if not hasattr(bot, "settings"):
             return
