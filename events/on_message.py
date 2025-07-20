@@ -30,9 +30,13 @@ class OnMessage(commands.Cog):
         bypass_role = None
 
         if self.bot.environment == "PRODUCTION":
-            if await bot.whitelabel.db.find_one({"Guild": message.guild.id}) is not None:
+            try:
+                if await bot.whitelabel.db.find_one({"Guild": message.guild.id}) is not None:
+                    return
+            except Exception as e:
+                logging.error(f"Error checking whitelabel status: {e}")
                 return
-        
+            
         if not hasattr(bot, "settings"):
             return
 

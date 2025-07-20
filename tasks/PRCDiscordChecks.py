@@ -152,9 +152,14 @@ async def prc_discord_checks(bot):
                     member = await get_cached_member_by_username(guild, player.username)
                     if not member:
                         not_in_discord.append(player)
-                
+                try:
+                    kick_after = settings.get("kick_after", 0)
+                except Exception as e:
+                    logging.error(f"Error getting kick_after setting for guild {guild_id}: {e}")
+                    kick_after = 0
+
                 if not_in_discord:
-                    await handle_discord_check_batch(bot, guild, not_in_discord, channel, message)
+                    await handle_discord_check_batch(bot, guild, not_in_discord, channel, message, kick_after)
             
             except Exception as e:
                 logging.error(f"Error processing guild {guild_id}: {e}", exc_info=True)
