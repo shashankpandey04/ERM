@@ -12654,3 +12654,4 @@ class ERLCDiscordChecksConfiguration(discord.ui.View):
         embed = interaction.message.embeds[0]
         embed.set_field_at(3, name="Alert Message", value=f"**Current Message:** {alert_message}", inline=False)
         await interaction.edit_original_response(embed=embed, view=self)
+        
