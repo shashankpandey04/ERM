@@ -38,7 +38,7 @@ from utils.utils import (
 import gspread
 import random
 
-from ui.erlc import (
+from views.erlc import (
     callSignCheck
 )
 
