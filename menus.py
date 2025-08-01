@@ -38,7 +38,7 @@ from utils.utils import (
 import gspread
 import random
 
-from views.erlc import (
+from UI.erlc import (
     callSignCheck
 )
 
@@ -8980,22 +8980,22 @@ class MoreERLCConfiguration(discord.ui.View):
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
-    @discord.ui.button(label="Whitelist Callsign Checks", row=2)
-    async def whitelist_callsign_checks(
-        self, interaction: discord.Interaction, button: discord.Button
-    ):
-        val = await self.interaction_check(interaction)
-        if val is False:
-            return
+    # @discord.ui.button(label="Whitelist Callsign Checks", row=2)
+    # async def whitelist_callsign_checks(
+    #     self, interaction: discord.Interaction, button: discord.Button
+    # ):
+    #     val = await self.interaction_check(interaction)
+    #     if val is False:
+    #         return
 
-        sett = await self.bot.settings.find_by_id(interaction.guild.id)
-        embed = discord.Embed(
-            title="Whitelist Callsign Checks",
-            description="This module allows for whitelisting callsign checks in your server. If a player fails the callsign check, they will be alerted in-game.",
-            color=BLANK_COLOR
-        )
-        view = callSignCheck(self.bot, interaction.user.id, sett)
-        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+    #     sett = await self.bot.settings.find_by_id(interaction.guild.id)
+    #     embed = discord.Embed(
+    #         title="Whitelist Callsign Checks",
+    #         description="This module allows for whitelisting callsign checks in your server. If a player fails the callsign check, they will be alerted in-game.",
+    #         color=BLANK_COLOR
+    #     )
+    #     view = callSignCheck(self.bot, interaction.user.id, sett)
+    #     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 class ExtendedPriorityConfiguration(AssociationConfigurationView):
     def __init__(self, *args, **kwargs):
